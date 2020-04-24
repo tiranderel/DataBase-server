@@ -1,0 +1,1 @@
+Версии загружаются с помощью team exploer from Visual Studio.
