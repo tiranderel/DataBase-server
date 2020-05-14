@@ -1,0 +1,3 @@
+C:/Users/tiran/Desktop/CMakepr/DataBase-server/project2/out/build/x64-Debug/CMakeFiles/project2.dir
+C:/Users/tiran/Desktop/CMakepr/DataBase-server/project2/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/tiran/Desktop/CMakepr/DataBase-server/project2/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
