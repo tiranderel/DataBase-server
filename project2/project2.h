@@ -44,7 +44,7 @@ private:
 
 	SOCKET c_sock;
 	SOCKADDR_IN c_addr;
-	char buffer[1024];
+	///char buffer[1024];
 
 
 	static DWORD WINAPI ThreadF(void *arg)

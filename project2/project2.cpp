@@ -215,8 +215,8 @@ unsigned long SClient::CalculationThread()
 		cout << "connection error" << endl;
 		return 2;
 	}
-	int k = recv(c_sock, buffer, sizeof(buffer), NULL);
-	printf("%u\n", k);
+	///int k = recv(c_sock, buffer, sizeof(buffer), NULL);
+	///printf("%u\n", k);
 	Sleep(30);
 }
 
