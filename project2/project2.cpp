@@ -52,7 +52,7 @@ int create_table(string s, int n) {
 	}
 	else
 	{
-		cout << "error of table creating" << endl;
+		cout << "error of table creating 1" << endl;
 		return 1;
 	}
 }
@@ -68,7 +68,7 @@ int delete_table(string s) {
 	}
 	else
 	{
-		cout << "error of table deleting" << endl;
+		cout << "error of table deleting 1" << endl;
 		return 1;
 	}
 }
@@ -136,12 +136,12 @@ int foo(string stroka)
 					file.close();
 				}
 				else {
-					cout << "error" << endl;
+					cout << "error 8" << endl;
 					return 8;
 				}
 			}
 			else {
-				cout << "error" << endl;
+				cout << "error 7" << endl;
 				return 7;
 			}
 		}
@@ -157,7 +157,7 @@ int foo(string stroka)
 				int nn = stoi(match.str());
 				int err = create_table(table_name, nn);
 				if (err > 0) {
-					//cout << "error" << endl;
+					cout << "error 6" << endl;
 					return 6;
 				}
 			}
@@ -170,19 +170,19 @@ int foo(string stroka)
 					string table_name = match.str();
 					int err = delete_table(table_name);
 					if (err > 0) {
-						cout << "error" << endl;
+						cout << "error 5" << endl;
 						return 5;
 					}
 				}
 				else {
-					cout << "error" << endl;
+					cout << "error 4" << endl;
 					return 4;
 				}
 			}
 		}
 	}
 	catch (regex_error& e) {
-		cout << "regex error" << endl;
+		cout << "regex error 3" << endl;
 		return 3;
 	}
 	return 0;
@@ -205,6 +205,7 @@ unsigned long SClient::CalculationThread()
 	er = recv(c_sock, recvstr, DEFAULT_BUFFER_LENGTH, NULL);
 	if (er > 0) {
 		string stroka = str(recvstr);
+		cout << stroka << endl;
 		return foo(stroka);
 	}
 	else if (er == 0) {
