@@ -52,7 +52,7 @@ int create_table(string s, int n) {
 	}
 	else
 	{
-		cout << "error of table creating 1" << endl;
+		//cout << "error of table creating 1" << endl;
 		return 1;
 	}
 }
@@ -61,15 +61,19 @@ int delete_table(string s) {
 	mapT::iterator  it = tables.find(s);
 	if (it != tables.end()) {
 		tables.erase(s);
-		if (remove((s + ".dat").c_str()))
-			cout << "Error removing file" << endl;
-		save_tables();
-		return 0;
+		if (remove((s + ".dat").c_str())) {
+			//cout << "Error removing file" << endl;
+			return 2;
+		}	
+		else {
+			save_tables();
+			return 0;
+		}		
 	}
 	else
 	{
-		cout << "error of table deleting 1" << endl;
-		return 1;
+		//cout << "error of table deleting 2" << endl;
+		return 2;
 	}
 }
 
@@ -136,13 +140,13 @@ int foo(string stroka)
 					file.close();
 				}
 				else {
-					cout << "error 8" << endl;
-					return 8;
+					cout << "error 4" << endl;
+					return 4;
 				}
 			}
 			else {
-				cout << "error 7" << endl;
-				return 7;
+				cout << "error 5" << endl;
+				return 5;
 			}
 		}
 		else {
@@ -155,10 +159,16 @@ int foo(string stroka)
 				wrd_next++;
 				match = *wrd_next;
 				int nn = stoi(match.str());
-				int err = create_table(table_name, nn);
-				if (err > 0) {
-					cout << "error 6" << endl;
-					return 6;
+				if (nn > 0) {
+					int err = create_table(table_name, nn);
+					if (err > 0) {
+						cout << "error 2" << endl;
+						return 2;
+					}
+				}
+				else {
+					cout << "error 1" << endl;
+					return 1;
 				}
 			}
 			else {
@@ -170,20 +180,20 @@ int foo(string stroka)
 					string table_name = match.str();
 					int err = delete_table(table_name);
 					if (err > 0) {
-						cout << "error 5" << endl;
-						return 5;
+						cout << "error 3" << endl;
+						return 3;
 					}
 				}
 				else {
-					cout << "error 4" << endl;
-					return 4;
+					cout << "error 6" << endl;
+					return 6;
 				}
 			}
 		}
 	}
 	catch (regex_error& e) {
-		cout << "regex error 3" << endl;
-		return 3;
+		cout << "regex error" << endl;
+		return 7;
 	}
 	return 0;
 }
