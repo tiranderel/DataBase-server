@@ -12,6 +12,8 @@
 #include <fstream>
 #include <stdio.h>
 #include <ctime>
+#include <vector>
+
 #define DEFAULT_BUFFER_LENGTH 256
 
 using namespace std;
@@ -44,7 +46,7 @@ private:
 
 	SOCKET c_sock;
 	SOCKADDR_IN c_addr;
-	///char buffer[1024];
+	char* c_buffer[1024];
 
 
 	static DWORD WINAPI ThreadF(void *arg)

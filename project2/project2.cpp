@@ -4,6 +4,7 @@ using namespace std;
 
 typedef map<string, int>  mapT;
 mapT tables;
+SOCKET *d_sock;
 
 int save_tables() {
 	string fname = "Tables.bin";
@@ -102,12 +103,15 @@ int foo(string stroka)
 {
 	string stroke = str_toupper(stroka);
 	string chislo = "(\\-*\\d+(.\\d+){0,1})";
+	string datar = "\\d\\d\\.\\d\\d\\.\\d\\d\\d\\d\\s\\d\\d\\:\\d\\d\\:\\d\\d";
 	regex insrt("I\\s+\\w+\\s+\\(" + chislo + "(\\s*\\,\\s+" + chislo + ")*\\)");
 	regex insrt2("\\(" + chislo + "(\\s*\\,\\s+" + chislo + ")*\\)");
 	regex crt("C\\s+\\w+\\s+\\d+");
 	regex dlt("D\\s+\\w+");
+	regex slt("S\\s+\\w+\\s+" + datar);
 	regex chi(chislo);
 	regex wrd("\\w+");
+	regex dtr(datar);
 	try {
 		sregex_iterator insrt_next(stroke.begin(), stroke.end(), insrt);
 		sregex_iterator end;
@@ -140,12 +144,12 @@ int foo(string stroka)
 					file.close();
 				}
 				else {
-					cout << "error 4" << endl;
+					//cout << "error 4" << endl;
 					return 4;
 				}
 			}
 			else {
-				cout << "error 5" << endl;
+				///cout << "error 5" << endl;
 				return 5;
 			}
 		}
@@ -162,12 +166,12 @@ int foo(string stroka)
 				if (nn > 0) {
 					int err = create_table(table_name, nn);
 					if (err > 0) {
-						cout << "error 2" << endl;
+						///cout << "error 2" << endl;
 						return 2;
 					}
 				}
 				else {
-					cout << "error 1" << endl;
+					///cout << "error 1" << endl;
 					return 1;
 				}
 			}
@@ -180,13 +184,113 @@ int foo(string stroka)
 					string table_name = match.str();
 					int err = delete_table(table_name);
 					if (err > 0) {
-						cout << "error 3" << endl;
+						///cout << "error 3" << endl;
 						return 3;
 					}
 				}
 				else {
-					cout << "error 6" << endl;
-					return 6;
+					sregex_iterator slt_next(stroke.begin(), stroke.end(), slt);
+					if (slt_next != end) {
+						sregex_iterator wrd_next(stroke.begin(), stroke.end(), wrd);
+						wrd_next++;
+						smatch match = *wrd_next;
+						string table_name = match.str();
+						sregex_iterator dtr_next(stroke.begin(), stroke.end(), dtr);
+						match = *dtr_next;
+						string startdata = match.str();
+						mapT::iterator  it = tables.find(table_name);
+						if (it != tables.end()) {
+							tm tt1;
+							try
+							{
+								tt1.tm_sec = (startdata[17] - 48) * 10 + startdata[18] - 48;
+								tt1.tm_min = (startdata[14] - 48) * 10 + startdata[15] - 48;
+								tt1.tm_hour = (startdata[11] - 48) * 10 + startdata[12] - 48;
+								tt1.tm_mday = (startdata[0] - 48) * 10 + startdata[1] - 48;
+								tt1.tm_mon = (startdata[3] - 48) * 10 + startdata[4] - 48 - 1;
+								tt1.tm_year = (startdata[6] - 48) * 1000 + (startdata[7] - 48) * 100 + (startdata[8] - 48) * 10 + startdata[9] - 48 - 1900;
+								time_t tt2 = mktime(&tt1);
+								ifstream in(table_name + ".dat", ios::binary);
+								// Создаем вектор с соответствующим размером (запрашиваем его через
+								// выставление указателя на конец файла)
+								vector<unsigned char> v(in.seekg(0, ios::end).tellg());
+								// Возвращаем указатель на место
+								in.seekg(0, ios::beg);
+								// Читаем файл в вектор
+								in.read((char*)v.data(), v.size());
+								int params = tables[table_name];
+								int dl_zapis = 8 + params * 4;
+								int zapis = v.size() / dl_zapis;
+								if (zapis > 0) {
+									time_t* tt0 = (time_t*)&v[0];
+									time_t* ttn = (time_t*)&v[(zapis - 1) * dl_zapis];
+									if (tt2 > * ttn){
+										v.clear();
+										return 10;
+									}
+									else {
+										int startpos = 0;
+										if (tt2 > * tt0) {
+											int pos1 = 0;
+											int posn = zapis - 1;
+											while (pos1 + 1 < posn) {
+												int pos3 = (pos1 + posn) / 2;
+												time_t* tt3 = (time_t*)&v[pos3 * dl_zapis];
+												if (tt2 > * tt3) {
+													pos1 = pos3;
+												}
+												else {
+													posn = pos3;
+												}
+											}
+											startpos = posn;
+										}
+										char mm[1024];
+										memcpy(mm, v.data() + startpos*dl_zapis, 1024);
+										v.clear();
+										char mm1[4];
+										mm1[0] = 0;
+										mm1[1] = 0;
+										mm1[2] = params;
+										int ter = 1024 / dl_zapis;
+										if (startpos + ter > zapis) {
+											ter = zapis - startpos;
+										}
+										mm1[3] = ter;
+										send(*d_sock, mm1, sizeof(mm1), NULL);
+										Sleep(10);
+										send(*d_sock, mm, sizeof(mm), NULL);
+										//cout << asctime(localtime(tt0)) << endl;
+										//cout << asctime(localtime(ttn)) << endl;
+										//cout << params << " " << dl_zapis << " " << zapis << endl;
+
+
+
+
+										//v.clear();
+										return 0;
+									}
+								}
+								else {
+									v.clear();
+									return 9;
+								}								
+							}
+							catch (...)
+							{
+								//cout << "error " << endl;
+								return 8;
+							}
+						}
+						else {
+							///cout << "error 5" << endl;
+							return 5;
+						}
+					}
+					else {
+						///cout << "error 6" << endl;
+						return 6;
+					}
 				}
 			}
 		}
@@ -202,21 +306,40 @@ string str(char* a)
 {
 	int i;
 	string s = "";
+	int ii = 0;
 	for (i = 0; i < DEFAULT_BUFFER_LENGTH; i++) {
-		s = s + a[i];
+		if(ii==0)
+			s = s + a[i];
+		if (a[i] == 0)
+			ii = 1;
 	}
 	return s;
 }
 
 unsigned long SClient::CalculationThread()
 {
+	d_sock = &c_sock;
 	int er;
 	char recvstr[DEFAULT_BUFFER_LENGTH];
 	er = recv(c_sock, recvstr, DEFAULT_BUFFER_LENGTH, NULL);
 	if (er > 0) {
 		string stroka = str(recvstr);
 		cout << stroka << endl;
-		return foo(stroka);
+		int res=-foo(stroka);
+		char* c = (char*)&res;
+
+		char msg1[4];
+		msg1[0] = *c;
+		msg1[1] = *(c + 1);
+		msg1[2] = *(c + 2);
+		msg1[3] = *(c + 3);
+
+
+		send(c_sock, msg1, sizeof(msg1), NULL);
+		Sleep(10);
+
+
+		return res;
 	}
 	else if (er == 0) {
 		cout << "connection terminated\n";
