@@ -4,7 +4,7 @@ using namespace std;
 
 typedef map<string, int>  mapT;
 mapT tables;
-SOCKET *d_sock;
+
 
 int save_tables() {
 	string fname = "Tables.bin";
@@ -99,7 +99,7 @@ SClient::~SClient()
 	CloseHandle(HandleThread);
 }
 
-int foo(string stroka)
+int foo(string stroka, SOCKET &d_sock)
 {
 	string stroke = str_toupper(stroka);
 	string chislo = "(\\-*\\d+(.\\d+){0,1})";
@@ -257,9 +257,9 @@ int foo(string stroka)
 											ter = zapis - startpos;
 										}
 										mm1[3] = ter;
-										send(*d_sock, mm1, sizeof(mm1), NULL);
+										send(d_sock, mm1, sizeof(mm1), NULL);
 										Sleep(10);
-										send(*d_sock, mm, sizeof(mm), NULL);
+										send(d_sock, mm, sizeof(mm), NULL);
 										//cout << asctime(localtime(tt0)) << endl;
 										//cout << asctime(localtime(ttn)) << endl;
 										//cout << params << " " << dl_zapis << " " << zapis << endl;
@@ -318,14 +318,14 @@ string str(char* a)
 
 unsigned long SClient::CalculationThread()
 {
-	d_sock = &c_sock;
+	//d_sock = &c_sock;
 	int er;
 	char recvstr[DEFAULT_BUFFER_LENGTH];
 	er = recv(c_sock, recvstr, DEFAULT_BUFFER_LENGTH, NULL);
 	if (er > 0) {
 		string stroka = str(recvstr);
 		cout << stroka << endl;
-		int res=-foo(stroka);
+		int res=-foo(stroka, c_sock);
 		char* c = (char*)&res;
 
 		char msg1[4];
